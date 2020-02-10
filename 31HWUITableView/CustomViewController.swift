@@ -61,19 +61,20 @@ final class CustomViewController: UIViewController, UITableViewDelegate, UITable
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         
-        guard indexPath.row > indexRowForAddButton else { return }
-        
-        if editingStyle == .delete {
-            groups[indexPath.section].employees.remove(at: indexPath.row - countOfAdditionalRows)
-            tableView.deleteRows(at: [indexPath], with: .fade)
+        switch editingStyle {
+        case .delete:
+            if !groups[indexPath.section].employees.isEmpty {
+                groups[indexPath.section].employees.remove(at: indexPath.row - countOfAdditionalRows)
+                tableView.deleteRows(at: [indexPath], with: .fade)
+            } else {
+                groups.remove(at: indexPath.section)
+                let deleteSectionIndexSet = IndexSet(arrayLiteral: indexPath.section)
+                tableView.deleteSections(deleteSectionIndexSet, with: .fade)
+            }
+        default:
+            break
         }
         
-        if groups[indexPath.section].employees.isEmpty {
-            groups.remove(at: indexPath.section)
-            let indexSet = IndexSet(arrayLiteral: indexPath.section)
-            tableView.deleteSections(indexSet, with: .right)
-            
-        }
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -94,7 +95,9 @@ final class CustomViewController: UIViewController, UITableViewDelegate, UITable
     
     func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
         
-        return indexPath.row == indexRowForAddButton ? .none : .delete
+        
+        
+        return indexPath.row == indexRowForAddButton && !groups[indexPath.section].employees.isEmpty ? .none : .delete
     }
     
     //MARK: UITableViewDataSource
